@@ -49,7 +49,7 @@ function PubSubHubbub(options){
         this.auth = {
             'user': options.username,
             'pass': options.password,
-            'sendImmediately': false
+            'sendImmediately': true
         }
     }    
 }
@@ -123,7 +123,7 @@ PubSubHubbub.prototype.setSubscription = function(mode, topic, hub, callbackUrl,
             "hub.callback": callbackUrl,
             "hub.mode": mode,
             "hub.topic": topic,
-            "hub.verify": "async"
+            "hub.verify": "sync"
         },
 
         postParams = {
