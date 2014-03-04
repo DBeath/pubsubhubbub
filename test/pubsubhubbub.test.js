@@ -1,14 +1,16 @@
-var expect = require('chai').expect,
-  http = require('http'),
-  request = require('request'),
-  crypto = require('crypto'),
-  pubSubHubbub = require("../index");
+var expect = require('chai').expect;
+var http = require('http');
+var request = require('request');
+var crypto = require('crypto');
+var pubSubHubbub = require("../index");
+
 
 var pubsub = pubSubHubbub.createServer({
-    callbackUrl: "http://localhost:8000/callback",
-    secret: "MyTopSecret",
-    username: "Test",
-    password: "P@ssw0rd"
+    callbackUrl: 'http://localhost:8000/callback',
+    secret: 'MyTopSecret',
+    username: 'Test',
+    password: 'P@ssw0rd',
+    format: 'json'
   });
 
 var topic = 'http://test.com',
@@ -36,8 +38,9 @@ describe('pubsubhubbub server', function () {
   });
 
   it('should have passed options correctly', function () {
-    expect(pubsub.callbackUrl).to.equal("http://localhost:8000/callback");
-    expect(pubsub.secret).to.equal("MyTopSecret");
+    expect(pubsub.callbackUrl).to.equal('http://localhost:8000/callback');
+    expect(pubsub.secret).to.equal('MyTopSecret');
+    expect(pubsub.format).to.equal('json');
   });
 
   it('should create an authentication object', function () {
@@ -56,6 +59,10 @@ describe('pubsubhubbub server', function () {
 describe('pubsubhubbub notification', function () {
   before(function () {
     pubsub.listen(8000);
+  });
+
+  after(function () {
+    pubsub.server.close();
   });
 
   it('should return 400 - no topic', function (done) {
@@ -156,9 +163,5 @@ describe('pubsubhubbub notification', function () {
       expect(eventFired).to.equal(false);
       done();
     }, 10);
-  });
-
-  after(function () {
-    pubsub.server.close();
   });
 });

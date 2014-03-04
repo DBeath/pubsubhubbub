@@ -28,6 +28,7 @@ Where options includes the following properties
   * **maxContentSize** (optional) Maximum allowed size of the POST messages
   * **username** (optional) Username for HTTP Authentication
   * **password** (optional) Password for HTTP Authentication
+  * **format** (optional) Format to receive notifications (only for Superfeedr JSON)
 
 ## Events
 

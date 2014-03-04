@@ -3,7 +3,10 @@ var pubSubHubbub = require("../index"),
     
     pubsub = pubSubHubbub.createServer({
         callbackUrl: "http://kreata.ee:1337",
-        secret: "MyTopSecret"
+        secret: "MyTopSecret",
+        username: 'demoName',
+        password: 'p@ssw0rd',
+        format: 'json'
     }),
     
     topic = "http://testetstetss.blogspot.com/feeds/posts/default",

@@ -18,6 +18,7 @@ var request = require("request"),
  * @param {Number} [options.maxContentSize] Maximum allowed size of the POST messages
  * @param {String} [options.username] Username for HTTP Authentication
  * @param {String} [options.password] Password for HTTP Authentication
+ * @param {String} [options.format] Format to receive feeds (only to receive JSON)
  * @return {Object} A PubSubHubbub server object
  */
 module.exports.createServer = function(options){
@@ -35,6 +36,7 @@ module.exports.createServer = function(options){
  * @param {Number} [options.maxContentSize] Maximum allowed size of the POST messages
  * @param {String} [options.username] Username for HTTP Authentication
  * @param {String} [options.password] Password for HTTP Authentication
+ * @param {String} [options.format] Format to receive feeds (only to receive feeds in JSON)
  */
 function PubSubHubbub(options){
     Stream.call(this);
@@ -44,6 +46,7 @@ function PubSubHubbub(options){
     this.secret = options.secret || false;
     this.callbackUrl = options.callbackUrl;
     this.maxContentSize = options.maxContentSize || 3 * 1024 * 1024;
+    this.format = options.format || 'atom';
 
     if (options.username) {
         this.auth = {
@@ -51,7 +54,7 @@ function PubSubHubbub(options){
             'pass': options.password,
             'sendImmediately': true
         }
-    }    
+    }   
 }
 utillib.inherits(PubSubHubbub, Stream);
 
@@ -139,6 +142,10 @@ PubSubHubbub.prototype.setSubscription = function(mode, topic, hub, callbackUrl,
     if(this.secret){
         // do not use the original secret but a generated one
         form["hub.secret"] = crypto.createHmac("sha1", this.secret).update(topic).digest("hex");
+    }
+
+    if (this.format === 'json' || this.format === 'JSON') {
+        form['format'] = 'json';
     }
 
     request.post(postParams, function(error, response, responseBody){
