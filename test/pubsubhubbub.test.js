@@ -65,54 +65,61 @@ describe('pubsubhubbub notification', function () {
     pubsub.server.close();
   });
 
+  var eventFired = false;
+  var data = null;
+
+  pubsub.on('error', function (_data) {
+      eventFired = true;
+      data = _data;
+  });
+
+  pubsub.on('feed', function (_data) {
+      eventFired = true;
+      data = _data;  
+  });
+
   it('should return 400 - no topic', function (done) {
     var options = {
       url: 'http://localhost:8000',
       headers: {
         'link': '<http://pubsubhubbub.appspot.com/>; rel="hub"'
       }
-    }
-    var eventFired = false;
+    };
+    eventFired = false;
+    data = null;
 
     request.post(options, function (err, res, body) {
       expect(res.statusCode).to.equal(400);
     });
 
-    pubsub.on('error', function (data) {
-      eventFired = true;
+    setTimeout(function () {
+      expect(eventFired).to.equal(true);
       expect(data.code).to.equal(400);
       expect(data.message).to.equal('Bad Request');
-    });
-
-    setTimeout(function(){
-      expect(eventFired).to.equal(true);
       done();
-    }, 100);
+    }, 20);
   });
 
-  it('should return 403 - no X-Hub-Signature', function (done){
+  it('should return 403 - no X-Hub-Signature', function (done) {
     var options = {
       url: 'http://localhost:8000',
       headers: {
         'link': '<http://test.com>; rel="self", <http://pubsubhubbub.appspot.com/>; rel="hub"',
       }
-    }
-    var eventFired = false;
+    };
+    eventFired = false;
+    data = null;
 
     request.post(options, function (err, res, body) {
       expect(res.statusCode).to.equal(403);    
     });
 
-    pubsub.on('error', function (data) {
-      eventFired = true;
+    setTimeout(function () {
+      expect(eventFired).to.equal(true);
       expect(data.code).to.equal(403);
       expect(data.message).to.equal('Forbidden');
-    });
-
-    setTimeout(function(){
-      expect(eventFired).to.equal(true);
       done();
-    }, 10);
+    }, 20);
   });
 
   it('should return 202 - signature does not match', function (done) {
@@ -146,7 +153,8 @@ describe('pubsubhubbub notification', function () {
   });
 
   it('should emit a feed event - successful request', function (done) {
-    var eventFired = false;
+    eventFired = false;
+    data = null;
     var options = {
       url: 'http://localhost:8000',
       headers: {
@@ -157,19 +165,16 @@ describe('pubsubhubbub notification', function () {
     }
     request.post(options, function (err, res, body) {});
 
-    pubsub.on('feed', function (data) {
-      eventFired = true;
-      expect(data.feed.toString()).to.equal(response_body);
-    });
-
     setTimeout(function(){
       expect(eventFired).to.equal(true);
+      expect(data.feed.toString()).to.equal(response_body);
       done();
-    }, 10);
+    }, 20);
   });
 
   it('should not emit a feed event - signature does not match', function (done) {
-    var eventFired = false;
+    eventFired = false;
+    data = null;
     var options = {
       url: 'http://localhost:8000',
       headers: {
@@ -180,12 +185,9 @@ describe('pubsubhubbub notification', function () {
     }
     request.post(options, function (err, res, body) {});
 
-    pubsub.on('feed', function () {
-      eventFired = true;
-    });
-
     setTimeout( function() {
       expect(eventFired).to.equal(false);
+      expect(data).to.equal(null);
       done();
     }, 10);
   });
