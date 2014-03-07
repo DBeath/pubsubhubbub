@@ -222,8 +222,8 @@ PubSubHubbub.prototype._onListening = function(){
  * @param {Object} res HTTP Response object
  */
 PubSubHubbub.prototype._onGetRequest = function(req, res){
-    var params = urllib.parse(req.url, true, true),
-        data;
+    var params = urllib.parse(req.url, true, true);
+    var data;
 
     // Does not seem to be a valid PubSubHubbub request
     if(!params.query["hub.topic"] || !params.query['hub.mode']){

@@ -6,12 +6,12 @@ var pubSubHubbub = require("../index");
 
 
 var pubsub = pubSubHubbub.createServer({
-    callbackUrl: 'http://localhost:8000/callback',
-    secret: 'MyTopSecret',
-    username: 'Test',
-    password: 'P@ssw0rd',
-    format: 'json'
-  });
+  callbackUrl: 'http://localhost:8000/callback',
+  secret: 'MyTopSecret',
+  username: 'Test',
+  password: 'P@ssw0rd',
+  format: 'json'
+});
 
 var topic = 'http://test.com',
   response_body = "This is a response.",
@@ -168,6 +168,7 @@ describe('pubsubhubbub notification', function () {
     setTimeout(function(){
       expect(eventFired).to.equal(true);
       expect(data.feed.toString()).to.equal(response_body);
+      expect(data.topic.toString()).to.equal('http://test.com');
       done();
     }, 20);
   });
@@ -190,5 +191,28 @@ describe('pubsubhubbub notification', function () {
       expect(data).to.equal(null);
       done();
     }, 10);
+  });
+});
+
+describe('pubsubhubbub verification', function () {
+  before(function () {
+    pubsub.listen(8000);
+  });
+
+  after(function () {
+    pubsub.server.close();
+  });
+
+  var eventFired = false;
+  var data = null;
+
+  pubsub.on('subscribe', function (_data) {
+    data = _data;
+    eventFired = true;
+  });
+
+  pubsub.on('unsubscribe', function (_data) {
+    data = _data;
+    eventFired = true;
   });
 });
