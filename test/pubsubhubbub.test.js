@@ -2,6 +2,8 @@ var expect = require('chai').expect;
 var http = require('http');
 var request = require('request');
 var crypto = require('crypto');
+var nock = require('nock');
+var querystring = require('querystring');
 var pubSubHubbub = require("../index");
 
 
@@ -93,7 +95,7 @@ describe('pubsubhubbub notification', function () {
     });
 
     setTimeout(function () {
-      expect(eventFired).to.equal(true);
+      expect(eventFired, 'eventFired should be true').to.equal(true);
       expect(data.code).to.equal(400);
       expect(data.message).to.equal('Bad Request');
       done();
@@ -186,7 +188,7 @@ describe('pubsubhubbub notification', function () {
     }
     request.post(options, function (err, res, body) {});
 
-    setTimeout( function() {
+    setTimeout( function () {
       expect(eventFired).to.equal(false);
       expect(data).to.equal(null);
       done();
@@ -214,5 +216,21 @@ describe('pubsubhubbub verification', function () {
   pubsub.on('unsubscribe', function (_data) {
     data = _data;
     eventFired = true;
+  });
+
+  it('should send valid subscription request', function (done) {
+    var scope = nock('http://test.com')
+                    .filteringRequestBody(function (path) {
+                      return querystring.parse(path)['hub.mode'];
+                    })
+                    .post('/feeds', 'subscribe')
+                    .reply(202);
+
+    pubsub.subscribe('http://test.com/topic', 'http://test.com/feeds', 'http://localhost:8000/callback');
+
+    setTimeout( function () {
+      expect(scope.isDone()).to.equal(true);
+      done();
+    }, 10);
   });
 });
